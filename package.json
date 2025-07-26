@@ -1,0 +1,63 @@
+{
+  "name": "ts-micro-mediator",
+  "version": "1.0.0",
+  "description": "Edge-optimized Mediator Pattern for Cloudflare Workers, Node.js, Bun, and Deno with CQRS support",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist/**/*",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "prepublishOnly": "npm run build",
+    "clean": "rimraf dist",
+    "prebuild": "npm run clean"
+  },
+  "dependencies": {
+    "ts-micro-result": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "rimraf": "^5.0.10",
+    "typescript": "^5.0.0"
+  },
+  "keywords": [
+    "mediator",
+    "pattern",
+    "cloudflare",
+    "workers",
+    "typescript",
+    "optimized",
+    "edge-computing",
+    "microservices",
+    "cqrs",
+    "event-driven",
+    "serverless",
+    "bun",
+    "deno",
+    "nodejs"
+  ],
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/minhtaimc/ts-micro-mediator.git"
+  },
+  "bugs": {
+    "url": "https://github.com/minhtaimc/ts-micro-mediator/issues"
+  },
+  "homepage": "https://github.com/minhtaimc/ts-micro-mediator#readme",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
