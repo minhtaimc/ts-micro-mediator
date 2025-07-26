@@ -13,7 +13,7 @@ export {
   IMediator,
   RequestHandler,
   NotificationHandler
-} from './public-types.js';
+} from './types.js';
 
 // High-level registration API
 export {

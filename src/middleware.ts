@@ -1,5 +1,5 @@
 import { MediatorFactory } from './mediator.js';
-import { IQuery, ICommand, INotification } from './public-types.js';
+import { IQuery, ICommand, INotification } from './types.js';
 
 /**
  * Edge-optimized middleware for Mediator
