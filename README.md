@@ -25,8 +25,8 @@ npm install ts-micro-mediator
 ### Queries (Read Operations)
 
 ```typescript
-import { IQuery, registerHandler, sendRequest, ok, RequestHandler } from 'ts-micro-mediator';
-import { Result } from 'ts-micro-result';
+import { IQuery, registerHandler, sendRequest, RequestHandler } from 'ts-micro-mediator';
+import { ok, Result } from 'ts-micro-result';
 
 interface User {
   id: string;
@@ -57,8 +57,8 @@ const result = await sendRequest(new GetUserQuery('123'));
 ### Commands (Write Operations)
 
 ```typescript
-import { ICommand, registerHandler, sendRequest, ok, RequestHandler } from 'ts-micro-mediator';
-import { Result } from 'ts-micro-result';
+import { ICommand, registerHandler, sendRequest, RequestHandler } from 'ts-micro-mediator';
+import { ok, Result } from 'ts-micro-result';
 
 interface User {
   id: string;
