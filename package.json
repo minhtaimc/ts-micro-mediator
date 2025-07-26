@@ -1,6 +1,6 @@
 {
   "name": "ts-micro-mediator",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Edge-optimized Mediator Pattern for Cloudflare Workers, Node.js, Bun, and Deno with CQRS support",
   "main": "dist/index.js",
   "module": "dist/index.js",
