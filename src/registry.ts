@@ -5,7 +5,10 @@ import {
   NotificationHandler,
   IRegistry,
   RequestType,
-  NotificationType
+  NotificationType,
+  RegistryStats,
+  RequestClassConstructor,
+  NotificationClassConstructor
 } from './types.js';
 
 /**
@@ -15,8 +18,8 @@ import {
 export class Registry implements IRegistry {
   private readonly requestHandlers = new Map<RequestType, RequestHandler<any, any>>();
   private readonly notificationHandlers = new Map<NotificationType, NotificationHandler<any>[]>();
-  private readonly requestClasses = new Map<RequestType, any>();
-  private readonly notificationClasses = new Map<NotificationType, any>();
+  private readonly requestClasses = new Map<RequestType, RequestClassConstructor>();
+  private readonly notificationClasses = new Map<NotificationType, NotificationClassConstructor>();
 
   /**
    * Register request handler - O(1)
@@ -42,7 +45,7 @@ export class Registry implements IRegistry {
   /**
    * Register request class - O(1)
    */
-  registerRequestClass(requestClass: any): void {
+  registerRequestClass(requestClass: RequestClassConstructor): void {
     const requestType = requestClass.name;
     this.requestClasses.set(requestType, requestClass);
   }
@@ -50,7 +53,7 @@ export class Registry implements IRegistry {
   /**
    * Register notification class - O(1)
    */
-  registerNotificationClass(notificationClass: any): void {
+  registerNotificationClass(notificationClass: NotificationClassConstructor): void {
     const notificationType = notificationClass.name;
     this.notificationClasses.set(notificationType, notificationClass);
   }
@@ -98,7 +101,7 @@ export class Registry implements IRegistry {
   /**
    * Get registry stats - O(1)
    */
-  getStats() {
+  getStats(): RegistryStats {
     return {
       requestHandlers: this.requestHandlers.size,
       notificationHandlers: this.notificationHandlers.size,
@@ -106,9 +109,4 @@ export class Registry implements IRegistry {
       notificationClasses: this.notificationClasses.size
     };
   }
-
-  /**
-   * Clear cache (useful for memory management)
-   */
-
 } 

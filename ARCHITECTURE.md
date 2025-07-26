@@ -44,12 +44,12 @@ ts-micro-mediator/
 - `IMediator` - Interface cho mediator
 
 ### Internal Interfaces:
-- `IRequest<TResponse>` - Base interface cho internal implementation
-- `IQuery` và `ICommand` extend từ `IRequest`
+- `IRequest<TResponse>` - Base interface for internal implementation
+- `IQuery` and `ICommand` extend from `IRequest`
 
 ### Type Signatures:
 ```typescript
-// Handler registration - chỉ cần 1 generic parameter
+// Handler registration - only needs 1 generic parameter
 registerHandler<TResponse>(
   requestType: string,
   handler: (request: IRequest<TResponse>) => Promise<Result<TResponse>>
@@ -59,7 +59,7 @@ registerHandler<TResponse>(
 type RequestHandler<TRequest, TResponse> = 
   (request: TRequest) => Promise<Result<TResponse>>
 
-// User chỉ cần implement IQuery hoặc ICommand
+// User only needs to implement IQuery or ICommand
 class GetUserQuery implements IQuery<User> { ... }
 class CreateUserCommand implements ICommand<User> { ... }
 ```
@@ -76,9 +76,9 @@ graph TD;
   D --> G[NotificationHandler]
 ```
 
-- Đăng ký handler/class qua helpers → lưu vào Registry (singleton)
-- Gửi request/notification qua helper/middleware → Mediator lấy handler từ Registry, thực thi
-- Kết quả trả về dạng Result (ok/err)
+- Register handlers/classes via helpers → store in Registry (singleton)
+- Send requests/notifications via helper/middleware → Mediator gets handler from Registry, executes
+- Results returned as Result (ok/err)
 
 ## 6. Middleware Integration
 
@@ -120,11 +120,12 @@ app.use(mediatorMiddleware());
 - **Deno**: Oak, native
 - **Any HTTP framework**: Direct usage
 
-## 7. Cách mở rộng/đăng ký handler
+## 7. How to extend/register handlers
 
 ### Manual Registration:
 ```typescript
 class GetUserQuery implements IQuery<User> {
+  readonly _response?: User;
   constructor(public userId: string) {}
 }
 
@@ -134,21 +135,22 @@ registerHandler('GetUserQuery', async (query) => {
 ```
 
 ### Auto-generation (Recommended):
-1. Tạo file `src/users/get-user.handler.ts`:
+1. Create file `src/users/get-user.handler.ts`:
 ```typescript
 export const getUserHandler = async (query: GetUserQuery) => {
   return ok(user);
 };
 ```
 
-2. Tạo file `src/users/get-user.query.ts`:
+2. Create file `src/users/get-user.query.ts`:
 ```typescript
 export class GetUserQuery implements IQuery<User> {
+  readonly _response?: User;
   constructor(public userId: string) {}
 }
 ```
 
-3. Chạy script generate:
+3. Run generate script:
 ```bash
 node src/generate-handlers.js
 ```
@@ -158,14 +160,14 @@ node src/generate-handlers.js
 import './generated-handlers.js';
 ```
 
-## 8. Lưu ý tối ưu cho edge
-- Singleton pattern, lazy init, không giữ state thừa
-- Không dùng console, không log runtime
-- Không cache dư thừa, không queue nội bộ
-- Tất cả lookup O(1), batch O(n)
-- Không phụ thuộc Node.js, có thể dùng trên Bun, Deno, Cloudflare Workers
+## 8. Edge optimization notes
+- Singleton pattern, lazy init, no unnecessary state
+- No console usage, no runtime logging
+- No unnecessary caching, no internal queues
+- All lookups O(1), batch O(n)
+- No Node.js dependency, can be used on Bun, Deno, Cloudflare Workers
 
-## 9. Ví dụ sử dụng tổng quát
+## 9. General usage example
 ```typescript
 import {
   IQuery, ICommand, registerHandler, sendRequest, sendBatch, publishNotification, mediatorMiddleware
@@ -173,11 +175,13 @@ import {
 
 // Query (read)
 class GetUserQuery implements IQuery<User> {
+  readonly _response?: User;
   constructor(public userId: string) {}
 }
 
 // Command (write)
 class CreateUserCommand implements ICommand<User> {
+  readonly _response?: User;
   constructor(public name: string, public email: string) {}
 }
 
@@ -195,7 +199,7 @@ registerHandler('CreateUserCommand', async (command) => {
   return ok(user);
 });
 
-// Gửi request
+// Send request
 const result = await sendRequest(new GetUserQuery('123'));
 
 // Batch
@@ -208,13 +212,13 @@ const results = await sendBatch([
 app.use(mediatorMiddleware());
 ```
 
-## 10. Liên hệ các thành phần
-- **User chỉ cần import từ index.ts** (public API)
-- **Không cần quan tâm Registry/Mediator internal**
-- **Helpers/middleware** là entrypoint chính cho mọi flow
-- **Tất cả handler/notification đều đăng ký qua helpers**
-- **Không cần quản lý lifecycle, singleton tự động**
-- **Auto-generation giúp giảm boilerplate code**
+## 10. Component relationships
+- **User only needs to import from index.ts** (public API)
+- **No need to care about Registry/Mediator internals**
+- **Helpers/middleware** are the main entrypoints for all flows
+- **All handlers/notifications are registered via helpers**
+- **No need to manage lifecycle, singleton is automatic**
+- **Auto-generation helps reduce boilerplate code**
 
 ---
-**Mọi thắc mắc, xem thêm README.md hoặc liên hệ maintainer.** 
+**For questions, see README.md or contact maintainer.** 

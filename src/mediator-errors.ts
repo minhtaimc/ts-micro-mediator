@@ -12,9 +12,5 @@ export const MEDIATOR_ERRORS = {
   INVALID_HANDLER_RESULT: (requestType: string): ErrorDetail => ({
     code: 'INVALID_HANDLER_RESULT',
     message: `Handler returned invalid result for request type: ${requestType}`
-  }),
-  BATCH_ERROR: {
-    code: 'BATCH_ERROR',
-    message: 'Batch processing failed for request'
-  } as ErrorDetail
+  })
 }; 

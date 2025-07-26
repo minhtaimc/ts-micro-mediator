@@ -11,23 +11,17 @@ export {
   ICommand,
   INotification,
   IMediator,
+  IRequest,
   RequestHandler,
   NotificationHandler
 } from './types.js';
 
-// High-level registration API
+// Public registry API (frequently used)
 export {
   registerHandler,
   registerNotificationHandler,
   registerRequestClass,
-  registerNotificationClass,
-  registerBatch
-} from './helpers.js';
-
-// High-level execution API
-export {
-  sendBatch,
-  publishBatch
+  registerNotificationClass
 } from './helpers.js';
 
 // High-level middleware API
@@ -36,4 +30,17 @@ export {
   sendRequest,
   publishNotification,
   getMediatorStats
-} from './middleware.js'; 
+} from './middleware.js';
+
+// Advanced helper functions (less frequently used)
+export {
+  createRequestFromData,
+  createNotificationFromData,
+  registerBatch,
+  getRegistryStats,
+  resetRegistry,
+  sendBatch,
+  publishBatch
+} from './helpers.js';
+
+// Note: Less frequently used helpers (batch, createFromData, ...) are in './helpers.js' 

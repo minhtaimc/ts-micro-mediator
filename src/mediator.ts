@@ -2,8 +2,10 @@ import {
   IRequest, 
   INotification, 
   IMediator,
+  IRegistry,
   RequestType,
-  NotificationType
+  NotificationType,
+  RegistryStats
 } from './types.js';
 import { Registry } from './registry.js';
 import { Result, err } from 'ts-micro-result';
@@ -14,10 +16,17 @@ import { MEDIATOR_ERRORS } from './mediator-errors.js';
  * Minimal memory footprint, fast execution
  */
 export class Mediator implements IMediator {
-  private readonly registry: Registry;
+  private readonly _registry: Registry;
 
   constructor(registry: Registry) {
-    this.registry = registry;
+    this._registry = registry;
+  }
+
+  /**
+   * Registry instance for internal operations
+   */
+  get registry(): IRegistry {
+    return this._registry;
   }
 
   /**
@@ -25,7 +34,7 @@ export class Mediator implements IMediator {
    */
   async send<TResponse>(request: IRequest<TResponse>): Promise<Result<TResponse>> {
     const requestType = this.getRequestType(request);
-    const handler = this.registry.getHandler(requestType);
+    const handler = this._registry.getHandler(requestType);
 
     if (!handler) {
       return err(MEDIATOR_ERRORS.HANDLER_NOT_FOUND(requestType));
@@ -43,7 +52,7 @@ export class Mediator implements IMediator {
    * Publish notification - O(n) handlers
    */
   async publish<TNotification extends INotification>(notification: TNotification): Promise<void> {
-    const handlers = this.registry.getNotificationHandlers(this.getNotificationType(notification));
+    const handlers = this._registry.getNotificationHandlers(this.getNotificationType(notification));
     if (handlers.length > 0) {
       await Promise.all(handlers.map(handler => handler(notification).catch(() => {})));
     }
@@ -63,8 +72,6 @@ export class Mediator implements IMediator {
     await Promise.all(notifications.map(notification => this.publish(notification).catch(() => {})));
   }
 
-
-
   /**
    * Get request type - O(1)
    */
@@ -82,8 +89,8 @@ export class Mediator implements IMediator {
   /**
    * Get mediator stats
    */
-  getStats() {
-    return this.registry.getStats();
+  getStats(): RegistryStats {
+    return this._registry.getStats();
   }
 }
 

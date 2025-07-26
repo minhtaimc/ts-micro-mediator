@@ -20,12 +20,32 @@ A lightweight, edge-optimized Mediator Pattern implementation for TypeScript. De
 npm install ts-micro-mediator
 ```
 
+## API Structure
+
+The library provides a clean separation between core functionality and advanced helpers:
+
+### Core API (Main Export)
+```typescript
+import { 
+  IQuery, ICommand, INotification, IMediator,
+  sendRequest, publishNotification, getMediatorStats,
+  registerHandler, registerNotificationHandler, registerRequestClass, registerNotificationClass
+} from 'ts-micro-mediator';
+```
+
+### Advanced Helpers (Optional)
+```typescript
+import { 
+  registerBatch, createRequestFromData, createNotificationFromData, getRegistryStats, resetRegistry, sendBatch, publishBatch
+} from 'ts-micro-mediator/registry-helpers';
+```
+
 ## Quick Start
 
 ### Queries (Read Operations)
 
 ```typescript
-import { IQuery, registerHandler, sendRequest, RequestHandler } from 'ts-micro-mediator';
+import { IQuery, sendRequest, RequestHandler, registerHandler } from 'ts-micro-mediator';
 import { ok, Result } from 'ts-micro-result';
 
 interface User {
@@ -35,6 +55,7 @@ interface User {
 }
 
 class GetUserQuery implements IQuery<User> {
+  readonly _response?: User;
   constructor(public userId: string) {}
 }
 
@@ -57,7 +78,7 @@ const result = await sendRequest(new GetUserQuery('123'));
 ### Commands (Write Operations)
 
 ```typescript
-import { ICommand, registerHandler, sendRequest, RequestHandler } from 'ts-micro-mediator';
+import { ICommand, sendRequest, RequestHandler, registerHandler } from 'ts-micro-mediator';
 import { ok, Result } from 'ts-micro-result';
 
 interface User {
@@ -67,6 +88,7 @@ interface User {
 }
 
 class CreateUserCommand implements ICommand<User> {
+  readonly _response?: User;
   constructor(public name: string, public email: string) {}
 }
 
@@ -89,7 +111,7 @@ const result = await sendRequest(new CreateUserCommand('Jane', 'jane@example.com
 ### Notifications (Events)
 
 ```typescript
-import { INotification, registerNotificationHandler, publishNotification, NotificationHandler } from 'ts-micro-mediator';
+import { INotification, publishNotification, NotificationHandler, registerNotificationHandler } from 'ts-micro-mediator';
 
 interface User {
   id: string;
@@ -106,14 +128,8 @@ const userCreatedHandler = async (notification: UserCreatedNotification) => {
   console.log('User created:', notification.user);
 };
 
-// Explicit way
-const userCreatedHandlerExplicit: NotificationHandler<UserCreatedNotification> = async (notification) => {
-  console.log('User created:', notification.user);
-};
-
 registerNotificationHandler('UserCreatedNotification', userCreatedHandler);
-const user: User = { id: '1', name: 'John', email: 'john@example.com' };
-await publishNotification(new UserCreatedNotification(user));
+await publishNotification(new UserCreatedNotification({ id: '1', name: 'John', email: 'john@example.com' }));
 ```
 
 ---
