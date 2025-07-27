@@ -1,6 +1,7 @@
 # ts-micro-mediator
 
 [![npm version](https://badge.fury.io/js/ts-micro-mediator.svg)](https://badge.fury.io/js/ts-micro-mediator)
+![npm bundle size](https://img.shields.io/bundlephobia/min/ts-micro-mediator)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)](https://www.typescriptlang.org/)
 
@@ -248,5 +249,5 @@ MIT — see [LICENSE](LICENSE)
 
 ## Support
 - [Architecture Guide](ARCHITECTURE.md)
-- [Issues](https://github.com/yourusername/ts-micro-mediator/issues)
-- [Discussions](https://github.com/yourusername/ts-micro-mediator/discussions) 
+- [Issues](https://github.com/minhtaimc/ts-micro-mediator/issues)
+- [Discussions](https://github.com/minhtaimc/ts-micro-mediator/discussions) 
