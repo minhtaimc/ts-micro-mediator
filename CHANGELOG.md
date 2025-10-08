@@ -7,12 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2025-10-08
+
 ### Added
-- Initial release preparation
-- NPM package configuration
-- Comprehensive documentation
-- TypeScript support
-- Edge computing optimization
+- **CQRS Pattern Enhancement**: Separate type-safe handlers for Commands and Queries
+  - `CommandHandler<TCommand, TResponse>` type for command handlers
+  - `QueryHandler<TQuery, TResponse>` type for query handlers
+  - `registerCommandHandler()` function for type-safe command registration
+  - `registerQueryHandler()` function for type-safe query registration
+  - `sendCommand()` function for executing commands
+  - `sendQuery()` function for executing queries
+- Batch operations with CQRS support:
+  - `sendCommandBatch()` for executing multiple commands
+  - `sendQueryBatch()` for executing multiple queries
+- Export `Mediator` and `Registry` classes for advanced usage
+- Export `MediatorFactory` for custom mediator instances
+
+### Changed
+- Improved type safety when registering handlers (eliminates type checking errors)
+- Enhanced README with clearer structure and examples
+- Better separation of concerns between Commands (write) and Queries (read)
+- Reorganized documentation: simple examples first, detailed API reference later
+
+### Improved
+- Better IDE autocomplete support with explicit Command/Query types
+- Enhanced type inference for handler registration
+- Clearer error messages for type mismatches
+
+### Backward Compatible
+- All existing `registerHandler()` and `sendRequest()` functions still work
+- No breaking changes for existing code
+- Generic way still supported alongside CQRS pattern
 
 ## [1.0.0] - 2025-07-26
 

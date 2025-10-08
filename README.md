@@ -10,9 +10,8 @@ A lightweight, edge-optimized Mediator Pattern implementation for TypeScript. De
 ## Features
 - 🚀 Edge-optimized, minimal memory footprint
 - 🎯 CQRS: Command, Query, Notification separation
-- 🏗️ TypeScript-first, type-safe
+- 🏗️ TypeScript-first, fully type-safe
 - 🔌 Framework-agnostic (Hono, Express, Fastify, Elysia, ...)
-- 🤖 Example script for auto-registration
 - 📦 Only 31KB unpacked
 
 ## Installation
@@ -21,179 +20,220 @@ A lightweight, edge-optimized Mediator Pattern implementation for TypeScript. De
 npm install ts-micro-mediator
 ```
 
-## API Structure
+## Why CQRS Pattern?
 
-The library provides a clean separation between core functionality and advanced helpers:
+This library uses the **CQRS (Command Query Responsibility Segregation)** pattern:
 
-### Core API (Main Export)
-```typescript
-import { 
-  IQuery, ICommand, INotification, IMediator,
-  sendRequest, publishNotification, getMediatorStats,
-  registerHandler, registerNotificationHandler, registerRequestClass, registerNotificationClass
-} from 'ts-micro-mediator';
-```
+- **Commands** — Write operations (Create, Update, Delete)
+- **Queries** — Read operations (Get, List, Search)
+- **Notifications** — Events (UserCreated, OrderPlaced)
 
-### Advanced Helpers (Optional)
-```typescript
-import { 
-  registerBatch, createRequestFromData, createNotificationFromData, getRegistryStats, resetRegistry, sendBatch, publishBatch
-} from 'ts-micro-mediator/registry-helpers';
-```
+**Benefits:**
+- ✅ **Fully type-safe** - No type checking errors when registering handlers
+- ✅ **Clear separation** - Easy to understand what modifies data vs what reads data
+- ✅ **Better IDE support** - Enhanced autocomplete and type inference
+- ✅ **Maintainable** - Scales well as your application grows
+
+---
 
 ## Quick Start
 
-### Queries (Read Operations)
+### 1. Define Query (Read Operation)
 
 ```typescript
-import { IQuery, sendRequest, RequestHandler, registerHandler } from 'ts-micro-mediator';
-import { ok, Result } from 'ts-micro-result';
+import { IQuery, QueryHandler, registerQueryHandler, sendQuery } from 'ts-micro-mediator';
+import { ok } from 'ts-micro-result';
 
-interface User {
-  id: string;
-  name: string;
-  email: string;
-}
+interface User { id: string; name: string; }
 
 class GetUserQuery implements IQuery<User> {
-  readonly _response?: User;
   constructor(public userId: string) {}
 }
 
-// Simple way
-const getUserHandler = async (query: GetUserQuery) => {
-  const user: User = { id: query.userId, name: 'John Doe', email: 'john@example.com' };
+const getUserHandler: QueryHandler<GetUserQuery, User> = async (query) => {
+  const user = { id: query.userId, name: 'John Doe' };
   return ok(user);
 };
 
-// Explicit way
-const getUserHandlerExplicit: RequestHandler<GetUserQuery, User> = async (query) => {
-  const user: User = { id: query.userId, name: 'John Doe', email: 'john@example.com' };
-  return ok(user);
-};
+registerQueryHandler('GetUserQuery', getUserHandler);
 
-registerHandler('GetUserQuery', getUserHandler);
-const result = await sendRequest(new GetUserQuery('123'));
+// Execute
+const result = await sendQuery(new GetUserQuery('123'));
+if (result.ok) {
+  console.log(result.value); // { id: '123', name: 'John Doe' }
+}
 ```
 
-### Commands (Write Operations)
+### 2. Define Command (Write Operation)
 
 ```typescript
-import { ICommand, sendRequest, RequestHandler, registerHandler } from 'ts-micro-mediator';
-import { ok, Result } from 'ts-micro-result';
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-}
+import { ICommand, CommandHandler, registerCommandHandler, sendCommand } from 'ts-micro-mediator';
+import { ok } from 'ts-micro-result';
 
 class CreateUserCommand implements ICommand<User> {
-  readonly _response?: User;
   constructor(public name: string, public email: string) {}
 }
 
-// Simple way
-const createUserHandler = async (command: CreateUserCommand) => {
-  const user: User = { id: 'new-id', name: command.name, email: command.email };
+const createUserHandler: CommandHandler<CreateUserCommand, User> = async (cmd) => {
+  const user = { id: 'new-id', name: cmd.name, email: cmd.email };
   return ok(user);
 };
 
-// Explicit way
-const createUserHandlerExplicit: RequestHandler<CreateUserCommand, User> = async (command) => {
-  const user: User = { id: 'new-id', name: command.name, email: command.email };
-  return ok(user);
-};
+registerCommandHandler('CreateUserCommand', createUserHandler);
 
-registerHandler('CreateUserCommand', createUserHandler);
-const result = await sendRequest(new CreateUserCommand('Jane', 'jane@example.com'));
+// Execute
+const result = await sendCommand(new CreateUserCommand('Jane', 'jane@example.com'));
 ```
 
-### Notifications (Events)
+### 3. Define Notification (Event)
 
 ```typescript
-import { INotification, publishNotification, NotificationHandler, registerNotificationHandler } from 'ts-micro-mediator';
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-}
+import { INotification, registerNotificationHandler, publishNotification } from 'ts-micro-mediator';
 
 class UserCreatedNotification implements INotification {
   constructor(public user: User) {}
 }
 
-// Simple way
-const userCreatedHandler = async (notification: UserCreatedNotification) => {
+registerNotificationHandler('UserCreatedNotification', async (notification) => {
   console.log('User created:', notification.user);
-};
+  // Send email, update cache, etc.
+});
 
-registerNotificationHandler('UserCreatedNotification', userCreatedHandler);
-await publishNotification(new UserCreatedNotification({ id: '1', name: 'John', email: 'john@example.com' }));
+// Publish
+await publishNotification(new UserCreatedNotification({ id: '1', name: 'John' }));
 ```
 
 ---
 
-## Example: Auto-Registration Script
+## Advanced Usage
 
-> **Note:** The file `example/generate-handlers.js` in this repository is just an **example script** for auto-registering handlers. It is not included in the npm package. If you want to automate handler registration in your own project, you can copy, modify, or use this script as a reference.
+### Generic Way (Without CQRS)
 
-**How to use the example script:**
-1. Create handler files using the naming convention (`*.handler.ts`, `*.command.ts`, `*.query.ts`, `*.notification.ts`).
-2. Run the script:
-   ```bash
-   node example/generate-handlers.js
-   ```
-3. Import the generated file:
-   ```typescript
-   import './generated-handlers.js';
-   ```
+If you prefer a simpler approach without separating Commands and Queries:
+
+```typescript
+import { registerHandler, sendRequest } from 'ts-micro-mediator';
+
+// Register
+registerHandler('GetUserQuery', getUserHandler);
+registerHandler('CreateUserCommand', createUserHandler);
+
+// Execute
+const result = await sendRequest(new GetUserQuery('123'));
+const createResult = await sendRequest(new CreateUserCommand('Jane', 'jane@example.com'));
+```
+
+### Direct Mediator Instance
+
+For advanced scenarios (testing, dependency injection):
+
+```typescript
+import { Mediator, Registry } from 'ts-micro-mediator';
+
+const registry = new Registry();
+const mediator = new Mediator(registry);
+
+// Register
+registry.registerCommandHandler('CreateUserCommand', createUserHandler);
+registry.registerQueryHandler('GetUserQuery', getUserHandler);
+
+// Execute
+const result = await mediator.sendCommand(new CreateUserCommand('John', 'john@example.com'));
+```
+
+### Batch Operations
+
+```typescript
+import { sendCommandBatch, sendQueryBatch, publishBatch } from 'ts-micro-mediator';
+
+// Execute multiple commands
+const commands = [
+  new CreateUserCommand('John', 'john@example.com'),
+  new CreateUserCommand('Jane', 'jane@example.com')
+];
+const results = await sendCommandBatch(commands);
+
+// Execute multiple queries
+const queries = [
+  new GetUserQuery('123'),
+  new GetUserQuery('456')
+];
+const queryResults = await sendQueryBatch(queries);
+
+// Publish multiple notifications
+const notifications = [
+  new UserCreatedNotification(user1),
+  new UserCreatedNotification(user2)
+];
+await publishBatch(notifications);
+```
+
+### Error Handling
+
+```typescript
+const result = await sendCommand(new CreateUserCommand('John', 'john@example.com'));
+
+if (result.ok) {
+  console.log('Success:', result.value);
+} else {
+  console.error('Error:', result.error);
+}
+```
+
+### Auto-Registration
+
+Check out `examples/generate-handlers.js` for a script that automatically registers handlers based on file naming conventions (`*.command.ts`, `*.query.ts`, `*.handler.ts`).
 
 ---
 
 ## Framework Integration
 
-### Direct Usage (Recommended)
-```typescript
-import { sendRequest } from 'ts-micro-mediator';
-
-// Works with any framework - just call sendRequest directly
-const result = await sendRequest(new GetUserQuery('123'));
-```
-
 ### Hono (Cloudflare Workers)
+
 ```typescript
 import { Hono } from 'hono';
-import { sendRequest } from 'ts-micro-mediator';
+import { sendQuery, sendCommand } from 'ts-micro-mediator';
 
 const app = new Hono();
 
 app.get('/users/:id', async (c) => {
-  const userId = c.req.param('id');
-  const result = await sendRequest(new GetUserQuery(userId));
-  return result.ok 
-    ? c.json(result.value)
-    : c.json({ error: result.error }, 400);
+  const result = await sendQuery(new GetUserQuery(c.req.param('id')));
+  return result.ok ? c.json(result.value) : c.json({ error: result.error }, 400);
 });
+
+app.post('/users', async (c) => {
+  const body = await c.req.json();
+  const result = await sendCommand(new CreateUserCommand(body.name, body.email));
+  return result.ok ? c.json(result.value, 201) : c.json({ error: result.error }, 400);
+});
+
+export default app;
 ```
 
 ### Express.js
+
 ```typescript
 import express from 'express';
-import { sendRequest } from 'ts-micro-mediator';
+import { sendQuery, sendCommand } from 'ts-micro-mediator';
 
 const app = express();
 app.use(express.json());
 
 app.get('/users/:id', async (req, res) => {
-  const result = await sendRequest(new GetUserQuery(req.params.id));
+  const result = await sendQuery(new GetUserQuery(req.params.id));
   result.ok ? res.json(result.value) : res.status(400).json({ error: result.error });
 });
+
+app.post('/users', async (req, res) => {
+  const result = await sendCommand(new CreateUserCommand(req.body.name, req.body.email));
+  result.ok ? res.status(201).json(result.value) : res.status(400).json({ error: result.error });
+});
+
+app.listen(3000);
 ```
 
 ### Optional Middleware
-If you prefer middleware-style integration:
+
 ```typescript
 import { mediatorMiddleware } from 'ts-micro-mediator';
 
@@ -202,17 +242,219 @@ app.use('*', mediatorMiddleware());
 
 // Express
 app.use(mediatorMiddleware());
+
+// Access mediator from context
+app.get('/users/:id', async (c) => {
+  const result = await c.mediator.sendQuery(new GetUserQuery(c.req.param('id')));
+  return c.json(result.value);
+});
 ```
 
-**Benefits of using middleware:**
-- **Context injection**: Automatically injects mediator instance into request context
-- **Error handling**: Centralized error handling for mediator operations
-- **Request lifecycle**: Better integration with framework's request/response cycle
-- **Middleware chain**: Can be combined with other middleware in the chain
+---
 
-**When to use direct usage vs middleware:**
-- **Direct usage**: Simple applications, microservices, when you just need basic mediator functionality
-- **Middleware**: Complex applications, when you need framework integration features, error handling, or context injection
+## API Reference
+
+### Interfaces
+
+```typescript
+// Base interfaces
+interface ICommand<TResponse = void> { }
+interface IQuery<TResponse> { }
+interface INotification { }
+interface IMediator { }
+interface IRegistry { }
+
+// Stats
+interface RegistryStats {
+  requestHandlers: number;
+  notificationHandlers: number;
+  requestClasses: number;
+  notificationClasses: number;
+}
+```
+
+### Handler Types
+
+```typescript
+// CQRS Pattern (Type-safe)
+type CommandHandler<TCommand extends ICommand<TResponse>, TResponse = void> = 
+  (command: TCommand) => Promise<Result<TResponse>>;
+
+type QueryHandler<TQuery extends IQuery<TResponse>, TResponse = void> = 
+  (query: TQuery) => Promise<Result<TResponse>>;
+
+// Generic (Backward compatibility)
+type RequestHandler<TRequest extends IRequest<TResponse>, TResponse = void> = 
+  (request: TRequest) => Promise<Result<TResponse>>;
+
+// Notifications
+type NotificationHandler<TNotification extends INotification> = 
+  (notification: TNotification) => Promise<void>;
+```
+
+### Registration Functions
+
+**CQRS Pattern:**
+```typescript
+// Type-safe registration
+registerCommandHandler<TCommand, TResponse>(
+  type: string, 
+  handler: CommandHandler<TCommand, TResponse>
+): void;
+
+registerQueryHandler<TQuery, TResponse>(
+  type: string, 
+  handler: QueryHandler<TQuery, TResponse>
+): void;
+```
+
+**Generic Way:**
+```typescript
+// Generic registration
+registerHandler<TResponse>(
+  type: string, 
+  handler: RequestHandler<IRequest<TResponse>, TResponse>
+): void;
+```
+
+**Notifications:**
+```typescript
+registerNotificationHandler(
+  type: string, 
+  handler: NotificationHandler<INotification>
+): void;
+```
+
+**Class Registration:**
+```typescript
+registerRequestClass(requestClass: RequestClassConstructor): void;
+registerNotificationClass(notificationClass: NotificationClassConstructor): void;
+```
+
+### Execution Functions
+
+**CQRS Pattern:**
+```typescript
+sendCommand<TResponse>(command: ICommand<TResponse>): Promise<Result<TResponse>>;
+sendQuery<TResponse>(query: IQuery<TResponse>): Promise<Result<TResponse>>;
+```
+
+**Generic Way:**
+```typescript
+sendRequest<TResponse>(request: IRequest<TResponse>): Promise<Result<TResponse>>;
+```
+
+**Notifications:**
+```typescript
+publishNotification<TNotification extends INotification>(
+  notification: TNotification
+): Promise<void>;
+```
+
+**Batch Operations:**
+```typescript
+sendCommandBatch<TResponse>(commands: ICommand<TResponse>[]): Promise<Result<TResponse>[]>;
+sendQueryBatch<TResponse>(queries: IQuery<TResponse>[]): Promise<Result<TResponse>[]>;
+sendBatch<TResponse>(requests: IRequest<TResponse>[]): Promise<Result<TResponse>[]>;
+publishBatch<TNotification extends INotification>(notifications: TNotification[]): Promise<void>;
+```
+
+**Utility Functions:**
+```typescript
+getMediatorStats(): RegistryStats;
+getRegistryStats(): RegistryStats;
+resetRegistry(): void;
+mediatorMiddleware(): MiddlewareFunction;
+```
+
+**Factory & Creation:**
+```typescript
+createRequestFromData<T extends IRequest<any>>(type: string, data: any): T | null;
+createNotificationFromData<T extends INotification>(type: string, data: any): T | null;
+```
+
+**Batch Registration:**
+```typescript
+registerBatch(registrations: {
+  handlers?: Array<{ type: string; handler: RequestHandler<any, any> }>;
+  notificationHandlers?: Array<{ type: string; handler: NotificationHandler<any> }>;
+  requestClasses?: RequestClassConstructor[];
+  notificationClasses?: NotificationClassConstructor[];
+}): void;
+```
+
+### Mediator Class
+
+```typescript
+class Mediator implements IMediator {
+  constructor(registry: Registry);
+  
+  // CQRS Pattern
+  sendCommand<TResponse>(command: ICommand<TResponse>): Promise<Result<TResponse>>;
+  sendQuery<TResponse>(query: IQuery<TResponse>): Promise<Result<TResponse>>;
+  
+  // Generic
+  send<TResponse>(request: IRequest<TResponse>): Promise<Result<TResponse>>;
+  
+  // Notifications
+  publish<TNotification extends INotification>(notification: TNotification): Promise<void>;
+  
+  // Batch operations
+  sendCommandBatch<TResponse>(commands: ICommand<TResponse>[]): Promise<Result<TResponse>[]>;
+  sendQueryBatch<TResponse>(queries: IQuery<TResponse>[]): Promise<Result<TResponse>[]>;
+  sendBatch<TResponse>(requests: IRequest<TResponse>[]): Promise<Result<TResponse>[]>;
+  publishBatch<TNotification extends INotification>(notifications: TNotification[]): Promise<void>;
+  
+  // Utility
+  getStats(): RegistryStats;
+  get registry(): IRegistry;
+}
+```
+
+### Registry Class
+
+```typescript
+class Registry implements IRegistry {
+  // CQRS Pattern
+  registerCommandHandler<TCommand, TResponse>(type: string, handler: CommandHandler<TCommand, TResponse>): void;
+  registerQueryHandler<TQuery, TResponse>(type: string, handler: QueryHandler<TQuery, TResponse>): void;
+  
+  // Generic
+  registerHandler<TResponse>(type: string, handler: RequestHandler<IRequest<TResponse>, TResponse>): void;
+  
+  // Notifications
+  registerNotificationHandler(type: string, handler: NotificationHandler<INotification>): void;
+  
+  // Retrieval
+  getHandler(type: string): RequestHandler<any, any> | undefined;
+  getNotificationHandlers(type: string): NotificationHandler<any>[];
+  
+  // Class registration
+  registerRequestClass(requestClass: RequestClassConstructor): void;
+  registerNotificationClass(notificationClass: NotificationClassConstructor): void;
+  
+  // Factory
+  createRequest(type: string, data: any): IRequest<any> | null;
+  createNotification(type: string, data: any): INotification | null;
+  
+  // Utility
+  reset(): void;
+  getStats(): RegistryStats;
+}
+```
+
+### MediatorFactory
+
+```typescript
+class MediatorFactory {
+  static create(): Mediator;
+  static createWithRegistry(registry: Registry): Mediator;
+  static reset(): void;
+  static getRegistry(): Registry | null;
+}
+```
+
+---
 
 ## Framework Compatibility
 
@@ -220,34 +462,15 @@ app.use(mediatorMiddleware());
 - ✅ **Node.js** (Express, Fastify, Koa)
 - ✅ **Bun** (Elysia, native)
 - ✅ **Deno** (Oak, native)
-- ✅ **Any HTTP framework** (direct usage)
-
----
-
-## API Reference
-
-### Core Interfaces
-- `IQuery<TResponse>` — for queries (read operations)
-- `ICommand<TResponse>` — for commands (write operations)
-- `INotification` — for notifications/events
-
-### Handler Types
-- `RequestHandler<TRequest, TResponse>` — for command/query handlers
-- `NotificationHandler<TNotification>` — for notification handlers
-
-### Main Functions
-- `registerHandler(type, handler)` — Register a handler for a command/query
-- `sendRequest(request)` — Send a command/query (works with any framework)
-- `sendBatch(requests)` — Send multiple requests
-- `publishNotification(notification)` — Publish a notification
-- `mediatorMiddleware()` — Optional framework middleware
+- ✅ **Any HTTP framework**
 
 ---
 
 ## License
 MIT — see [LICENSE](LICENSE)
 
-## Support
+## Links
 - [Architecture Guide](ARCHITECTURE.md)
+- [Changelog](CHANGELOG.md)
 - [Issues](https://github.com/minhtaimc/ts-micro-mediator/issues)
-- [Discussions](https://github.com/minhtaimc/ts-micro-mediator/discussions) 
+- [Discussions](https://github.com/minhtaimc/ts-micro-mediator/discussions)

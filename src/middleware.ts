@@ -30,7 +30,29 @@ export function mediatorMiddleware() {
 }
 
 /**
- * Send request via singleton mediator
+ * Send command via singleton mediator - CQRS Pattern
+ * Returns Promise<Result<TResponse>> for type-safe error handling
+ */
+export async function sendCommand<TResponse>(
+  command: ICommand<TResponse>
+): Promise<Result<TResponse>> {
+  const mediator = getMediator();
+  return await mediator.sendCommand(command);
+}
+
+/**
+ * Send query via singleton mediator - CQRS Pattern
+ * Returns Promise<Result<TResponse>> for type-safe error handling
+ */
+export async function sendQuery<TResponse>(
+  query: IQuery<TResponse>
+): Promise<Result<TResponse>> {
+  const mediator = getMediator();
+  return await mediator.sendQuery(query);
+}
+
+/**
+ * Send request via singleton mediator - Generic (backward compatibility)
  * Returns Promise<Result<TResponse>> for type-safe error handling
  */
 export async function sendRequest<TResponse>(

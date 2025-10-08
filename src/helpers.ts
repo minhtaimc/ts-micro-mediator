@@ -11,7 +11,7 @@ import {
   NotificationClassConstructor,
   IMediator
 } from './types.js';
-import { RequestHandler, NotificationHandler } from './types.js';
+import { RequestHandler, CommandHandler, QueryHandler, NotificationHandler } from './types.js';
 import { Result } from 'ts-micro-result';
 
 /**
@@ -30,7 +30,29 @@ function ensureMediator(): IMediator {
 }
 
 /**
- * Register request handler - O(1)
+ * Register command handler - O(1) - CQRS Pattern
+ */
+export function registerCommandHandler<TCommand extends ICommand<TResponse>, TResponse = void>(
+  commandType: RequestType,
+  handler: CommandHandler<TCommand, TResponse>
+): void {
+  const mediator = ensureMediator();
+  mediator.registry.registerCommandHandler(commandType, handler);
+}
+
+/**
+ * Register query handler - O(1) - CQRS Pattern
+ */
+export function registerQueryHandler<TQuery extends IQuery<TResponse>, TResponse = void>(
+  queryType: RequestType,
+  handler: QueryHandler<TQuery, TResponse>
+): void {
+  const mediator = ensureMediator();
+  mediator.registry.registerQueryHandler(queryType, handler);
+}
+
+/**
+ * Register request handler - O(1) - Generic (backward compatibility)
  */
 export function registerHandler<TResponse>(
   requestType: RequestType,

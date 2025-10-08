@@ -13,12 +13,16 @@ export {
   IMediator,
   IRequest,
   RequestHandler,
+  CommandHandler,
+  QueryHandler,
   NotificationHandler
 } from './types.js';
 
 // Public registry API (frequently used)
 export {
   registerHandler,
+  registerCommandHandler,
+  registerQueryHandler,
   registerNotificationHandler,
   registerRequestClass,
   registerNotificationClass
@@ -28,6 +32,8 @@ export {
 export {
   mediatorMiddleware,
   sendRequest,
+  sendCommand,
+  sendQuery,
   publishNotification,
   getMediatorStats
 } from './middleware.js';
@@ -42,5 +48,9 @@ export {
   sendBatch,
   publishBatch
 } from './helpers.js';
+
+// Advanced: Mediator and Registry classes for direct instantiation
+export { Mediator, MediatorFactory } from './mediator.js';
+export { Registry } from './registry.js';
 
 // Note: Less frequently used helpers (batch, createFromData, ...) are in './helpers.js' 

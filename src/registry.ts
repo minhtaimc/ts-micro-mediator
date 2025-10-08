@@ -1,6 +1,10 @@
 import { 
-  IRequest, 
-  RequestHandler, 
+  IRequest,
+  ICommand,
+  IQuery, 
+  RequestHandler,
+  CommandHandler,
+  QueryHandler, 
   INotification, 
   NotificationHandler,
   IRegistry,
@@ -22,7 +26,27 @@ export class Registry implements IRegistry {
   private readonly notificationClasses = new Map<NotificationType, NotificationClassConstructor>();
 
   /**
-   * Register request handler - O(1)
+   * Register command handler - O(1) - CQRS Pattern
+   */
+  registerCommandHandler<TCommand extends ICommand<TResponse>, TResponse = void>(
+    commandType: RequestType,
+    handler: CommandHandler<TCommand, TResponse>
+  ): void {
+    this.requestHandlers.set(commandType, handler as RequestHandler<any, any>);
+  }
+
+  /**
+   * Register query handler - O(1) - CQRS Pattern
+   */
+  registerQueryHandler<TQuery extends IQuery<TResponse>, TResponse = void>(
+    queryType: RequestType,
+    handler: QueryHandler<TQuery, TResponse>
+  ): void {
+    this.requestHandlers.set(queryType, handler as RequestHandler<any, any>);
+  }
+
+  /**
+   * Register request handler - O(1) - Generic (backward compatibility)
    */
   registerHandler<TResponse>(
     requestType: RequestType,

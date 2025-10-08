@@ -1,5 +1,7 @@
 import { 
-  IRequest, 
+  IRequest,
+  ICommand,
+  IQuery, 
   INotification, 
   IMediator,
   IRegistry,
@@ -30,7 +32,21 @@ export class Mediator implements IMediator {
   }
 
   /**
-   * Send request - O(1) lookup + execution
+   * Send command - O(1) lookup + execution - CQRS Pattern
+   */
+  async sendCommand<TResponse>(command: ICommand<TResponse>): Promise<Result<TResponse>> {
+    return this.send(command);
+  }
+
+  /**
+   * Send query - O(1) lookup + execution - CQRS Pattern
+   */
+  async sendQuery<TResponse>(query: IQuery<TResponse>): Promise<Result<TResponse>> {
+    return this.send(query);
+  }
+
+  /**
+   * Send request - O(1) lookup + execution - Generic (backward compatibility)
    */
   async send<TResponse>(request: IRequest<TResponse>): Promise<Result<TResponse>> {
     const requestType = this.getRequestType(request);
@@ -59,7 +75,21 @@ export class Mediator implements IMediator {
   }
 
   /**
-   * Batch send requests - O(n)
+   * Batch send commands - O(n) - CQRS Pattern
+   */
+  async sendCommandBatch<TResponse>(commands: ICommand<TResponse>[]): Promise<Result<TResponse>[]> {
+    return Promise.all(commands.map(command => this.sendCommand(command)));
+  }
+
+  /**
+   * Batch send queries - O(n) - CQRS Pattern
+   */
+  async sendQueryBatch<TResponse>(queries: IQuery<TResponse>[]): Promise<Result<TResponse>[]> {
+    return Promise.all(queries.map(query => this.sendQuery(query)));
+  }
+
+  /**
+   * Batch send requests - O(n) - Generic (backward compatibility)
    */
   async sendBatch<TResponse>(requests: IRequest<TResponse>[]): Promise<Result<TResponse>[]> {
     return Promise.all(requests.map(request => this.send(request)));
