@@ -206,7 +206,7 @@ const queryResult = await sendQuery(new GetUserQuery('123'));
 For framework-specific integration:
 
 ```typescript
-import { mediatorMiddleware } from 'ts-micro-mediator';
+import { mediatorMiddleware, attachMediator } from 'ts-micro-mediator';
 
 // Hono
 app.use('*', mediatorMiddleware());
@@ -216,10 +216,15 @@ app.use(mediatorMiddleware());
 
 // Access from context
 app.get('/users/:id', async (c) => {
-  const result = await c.mediator.sendQuery(new GetUserQuery(c.req.param('id')));
-  return c.json(result.value);
+  const ctx = attachMediator(c);
+  const result = await ctx.mediator.sendQuery(new GetUserQuery(ctx.req.param('id')));
+  return result.isOk()
+    ? ctx.json(result.data)
+    : ctx.json({ errors: result.errors }, result.status ?? 400);
 });
 ```
+
+Use `attachMediator` when you need typed access to the mediator on custom context objects (workers, Express requests, etc.). It only assigns the shared mediator when the property is missing, so existing context decorations remain untouched. If you just need the singleton without mutating context, call `resolveMediator()`.
 
 **Middleware Benefits:**
 - Context injection: Mediator instance in request context
@@ -392,13 +397,13 @@ registerNotificationHandler('UserCreatedNotification', async (notification) => {
 
 // Usage
 const result = await sendQuery(new GetUserQuery('123'));
-if (result.ok) {
-  console.log('User:', result.value);
+if (result.isOk()) {
+  console.log('User:', result.data);
 }
 
 const createResult = await sendCommand(new CreateUserCommand('John', 'john@example.com'));
-if (createResult.ok) {
-  console.log('Created:', createResult.value);
+if (createResult.isOk()) {
+  console.log('Created:', createResult.data);
 }
 ```
 
@@ -416,10 +421,10 @@ const commands = [
 
 const results = await sendCommandBatch(commands);
 results.forEach((result, index) => {
-  if (result.ok) {
-    console.log(`User ${index + 1} created:`, result.value);
+  if (result.isOk()) {
+    console.log(`User ${index + 1} created:`, result.data);
   } else {
-    console.error(`User ${index + 1} failed:`, result.error);
+    console.error(`User ${index + 1} failed:`, result.errors);
   }
 });
 
@@ -480,7 +485,7 @@ describe('Mediator', () => {
   it('should execute command', async () => {
     registry.registerCommandHandler('CreateUserCommand', createUserHandler);
     const result = await mediator.sendCommand(new CreateUserCommand('John', 'john@example.com'));
-    expect(result.ok).toBe(true);
+    expect(result.isOk()).toBe(true);
   });
 });
 ```
@@ -498,7 +503,7 @@ describe('Integration', () => {
   it('should handle complete flow', async () => {
     registerCommandHandler('CreateUserCommand', createUserHandler);
     const result = await sendCommand(new CreateUserCommand('John', 'john@example.com'));
-    expect(result.ok).toBe(true);
+    expect(result.isOk()).toBe(true);
   });
 });
 ```
@@ -551,3 +556,4 @@ const result = await sendCommand(new CreateUserCommand('John', 'john@example.com
 - [CHANGELOG.md](CHANGELOG.md) - Version history
 - [Examples](examples/) - Code examples
 - [Issues](https://github.com/minhtaimc/ts-micro-mediator/issues) - Bug reports & feature requests
+

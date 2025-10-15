@@ -1,6 +1,6 @@
 {
   "name": "ts-micro-mediator",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Edge-optimized Mediator Pattern for Cloudflare Workers, Node.js, Bun, and Deno with CQRS support",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -18,13 +18,14 @@
   ],
   "scripts": {
     "build": "tsc",
+    "test": "node --test \"tests/**/*.test.mjs\"",
     "dev": "tsc --watch",
     "prepublishOnly": "npm run build",
     "clean": "rimraf dist",
     "prebuild": "npm run clean"
   },
   "dependencies": {
-    "ts-micro-result": "^1.1.0"
+    "ts-micro-result": "^2.0.1"
   },
   "devDependencies": {
     "@types/node": "^24.7.0",

@@ -12,6 +12,7 @@ import {
 import { Registry } from './registry.js';
 import { Result, err } from 'ts-micro-result';
 import { MEDIATOR_ERRORS } from './mediator-errors.js';
+import { isResult } from './result-utils.js';
 
 /**
  * Edge-optimized Mediator
@@ -58,7 +59,10 @@ export class Mediator implements IMediator {
 
     try {
       const result = await handler(request);
-      return result?.ok !== undefined ? result : err(MEDIATOR_ERRORS.INVALID_HANDLER_RESULT(requestType));
+      if (isResult(result)) {
+        return result as Result<TResponse>;
+      }
+      return err(MEDIATOR_ERRORS.INVALID_HANDLER_RESULT(requestType));
     } catch {
       return err(MEDIATOR_ERRORS.HANDLER_ERROR(requestType));
     }

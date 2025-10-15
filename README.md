@@ -8,11 +8,11 @@
 A lightweight, edge-optimized Mediator Pattern implementation for TypeScript. Designed for Cloudflare Workers, Node.js, Bun, Deno, and serverless/edge environments.
 
 ## Features
-- 🚀 Edge-optimized, minimal memory footprint
-- 🎯 CQRS: Command, Query, Notification separation
-- 🏗️ TypeScript-first, fully type-safe
-- 🔌 Framework-agnostic (Hono, Express, Fastify, Elysia, ...)
-- 📦 Only 31KB unpacked
+- Edge-optimized, minimal memory footprint
+- CQRS: Command, Query, Notification separation
+- TypeScript-first, fully type-safe
+- Framework-agnostic (Hono, Express, Fastify, Elysia, ...)
+- Only 31KB unpacked
 
 ## Installation
 
@@ -24,15 +24,15 @@ npm install ts-micro-mediator
 
 This library uses the **CQRS (Command Query Responsibility Segregation)** pattern:
 
-- **Commands** — Write operations (Create, Update, Delete)
-- **Queries** — Read operations (Get, List, Search)
-- **Notifications** — Events (UserCreated, OrderPlaced)
+- **Commands** � Write operations (Create, Update, Delete)
+- **Queries** � Read operations (Get, List, Search)
+- **Notifications** � Events (UserCreated, OrderPlaced)
 
 **Benefits:**
-- ✅ **Fully type-safe** - No type checking errors when registering handlers
-- ✅ **Clear separation** - Easy to understand what modifies data vs what reads data
-- ✅ **Better IDE support** - Enhanced autocomplete and type inference
-- ✅ **Maintainable** - Scales well as your application grows
+- **Fully type-safe** - No type checking errors when registering handlers
+- **Clear separation** - Easy to understand what modifies data vs what reads data
+- **Better IDE support** - Enhanced autocomplete and type inference
+- **Maintainable** - Scales well as your application grows
 
 ---
 
@@ -59,8 +59,8 @@ registerQueryHandler('GetUserQuery', getUserHandler);
 
 // Execute
 const result = await sendQuery(new GetUserQuery('123'));
-if (result.ok) {
-  console.log(result.value); // { id: '123', name: 'John Doe' }
+if (result.isOk()) {
+  console.log(result.data); // { id: '123', name: 'John Doe' }
 }
 ```
 
@@ -173,10 +173,10 @@ await publishBatch(notifications);
 ```typescript
 const result = await sendCommand(new CreateUserCommand('John', 'john@example.com'));
 
-if (result.ok) {
-  console.log('Success:', result.value);
+if (result.isOk()) {
+  console.log('Success:', result.data);
 } else {
-  console.error('Error:', result.error);
+  console.error('Error:', result.errors[0]);
 }
 ```
 
@@ -198,13 +198,17 @@ const app = new Hono();
 
 app.get('/users/:id', async (c) => {
   const result = await sendQuery(new GetUserQuery(c.req.param('id')));
-  return result.ok ? c.json(result.value) : c.json({ error: result.error }, 400);
+  return result.isOk()
+    ? ctx.json(result.data)
+    : ctx.json({ errors: result.errors }, result.status ?? 400);
 });
 
 app.post('/users', async (c) => {
   const body = await c.req.json();
   const result = await sendCommand(new CreateUserCommand(body.name, body.email));
-  return result.ok ? c.json(result.value, 201) : c.json({ error: result.error }, 400);
+  return result.isOk()
+    ? c.json(result.data, result.status ?? 201)
+    : c.json({ errors: result.errors }, result.status ?? 400);
 });
 
 export default app;
@@ -221,12 +225,20 @@ app.use(express.json());
 
 app.get('/users/:id', async (req, res) => {
   const result = await sendQuery(new GetUserQuery(req.params.id));
-  result.ok ? res.json(result.value) : res.status(400).json({ error: result.error });
+  if (result.isOk()) {
+    res.json(result.data);
+  } else {
+    res.status(result.status ?? 400).json({ errors: result.errors });
+  }
 });
 
 app.post('/users', async (req, res) => {
   const result = await sendCommand(new CreateUserCommand(req.body.name, req.body.email));
-  result.ok ? res.status(201).json(result.value) : res.status(400).json({ error: result.error });
+  if (result.isOk()) {
+    res.status(result.status ?? 201).json(result.data);
+  } else {
+    res.status(result.status ?? 400).json({ errors: result.errors });
+  }
 });
 
 app.listen(3000);
@@ -235,7 +247,7 @@ app.listen(3000);
 ### Optional Middleware
 
 ```typescript
-import { mediatorMiddleware } from 'ts-micro-mediator';
+import { mediatorMiddleware, attachMediator } from 'ts-micro-mediator';
 
 // Hono
 app.use('*', mediatorMiddleware());
@@ -245,10 +257,15 @@ app.use(mediatorMiddleware());
 
 // Access mediator from context
 app.get('/users/:id', async (c) => {
-  const result = await c.mediator.sendQuery(new GetUserQuery(c.req.param('id')));
-  return c.json(result.value);
+  const ctx = attachMediator(c);
+  const result = await ctx.mediator.sendQuery(new GetUserQuery(ctx.req.param('id')));
+  return result.isOk()
+    ? ctx.json(result.data)
+    : ctx.json({ errors: result.errors }, result.status ?? 400);
 });
 ```
+
+Use `attachMediator` when you need typed access to the mediator on custom context objects (workers, Express requests, etc.). It only assigns the shared mediator when the property is missing, keeping existing context decorations intact. If you just need the singleton without mutating context, call `resolveMediator()`.
 
 ---
 
@@ -365,6 +382,9 @@ getMediatorStats(): RegistryStats;
 getRegistryStats(): RegistryStats;
 resetRegistry(): void;
 mediatorMiddleware(): MiddlewareFunction;
+attachMediator<TContext extends Record<string, unknown>>(ctx: TContext): WithMediator<TContext>;
+resolveMediator(): IMediator;
+isResult(value: unknown): value is Result<unknown>;
 ```
 
 **Factory & Creation:**
@@ -474,3 +494,7 @@ MIT — see [LICENSE](LICENSE)
 - [Changelog](CHANGELOG.md)
 - [Issues](https://github.com/minhtaimc/ts-micro-mediator/issues)
 - [Discussions](https://github.com/minhtaimc/ts-micro-mediator/discussions)
+
+
+
+

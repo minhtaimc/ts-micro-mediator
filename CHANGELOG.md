@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2025-10-15
+
+### Added
+- `resolveMediator()` helper for fetching the shared mediator without mutating context.
+- Runtime `isResult` tests to ensure handler outputs honour `ts-micro-result` 2.x contracts.
+
+### Changed
+- Hardened `attachMediator()` to avoid overwriting existing mediator instances and added richer documentation.
+- Optimized test workflow with smarter build caching and a streamlined `npm test` script.
+- Updated guides and architecture notes to reflect new mediator helper usage.
+
 ## [1.1.0] - 2025-10-08
 
 ### Added

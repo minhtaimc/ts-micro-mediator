@@ -27,17 +27,21 @@ async function exampleUsage() {
   // Type-safe query - TypeScript knows this returns Promise<Result<User>>
   const userResult: Result<User> = await sendRequest(new GetUserQuery('123'));
   
-  if (userResult.ok) {
-    const user: User = userResult.data; // Type-safe access to user data
+  if (userResult.isOk()) {
+    const user: User | null = userResult.data; // Type-safe access to user data
+    if (!user) {
+      console.warn('Query returned no user data');
+      return;
+    }
     console.log(`User: ${user.name} (${user.email})`);
   } else {
-    console.error(`Error: ${userResult.error.message}`);
+    console.error(`Error: ${userResult.errors[0]?.message ?? 'Unknown error'}`);
   }
 
   // Type-safe command - TypeScript knows this returns Promise<Result<User>>
   const createResult = await sendRequest(new CreateUserCommand('John Doe', 'john@example.com'));
   
-  if (createResult.ok) {
+  if (createResult.isOk() && createResult.data) {
     const newUser: User = createResult.data; // Type-safe access
     console.log(`Created user: ${newUser.id}`);
   }
@@ -54,11 +58,11 @@ async function demonstrateTypeSafety() {
   const result = await sendRequest(new GetUserQuery('123'));
   
   // TypeScript knows result is Result<User>, so you get autocomplete for:
-  // result.ok - boolean
-  // result.data - User (if ok is true)
-  // result.error - Error (if ok is false)
+  // result.isOk() - type guard for success branch
+  // result.data - User | null
+  // result.errors - ErrorDetail[]
   
-  if (result.ok) {
+  if (result.isOk() && result.data) {
     // TypeScript knows user is User type
     const user = result.data;
     console.log(user.name); // Autocomplete works for User properties

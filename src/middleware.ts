@@ -18,13 +18,42 @@ function getMediator(): IMediator {
 }
 
 /**
+ * Access the shared mediator instance without mutating any context.
+ */
+export function resolveMediator(): IMediator {
+  return getMediator();
+}
+
+export type WithMediator<TContext> = TContext & { mediator: IMediator };
+
+/**
+ * Attach mediator to the given context with proper typing for framework integrations.
+ */
+export function attachMediator<TContext extends Record<string, unknown>>(
+  ctx: TContext
+): WithMediator<TContext> {
+  const mediator = getMediator();
+  const withMediator = ctx as WithMediator<TContext>;
+
+  if (withMediator.mediator && withMediator.mediator !== mediator) {
+    return withMediator;
+  }
+
+  if (!withMediator.mediator) {
+    withMediator.mediator = mediator;
+  }
+
+  return withMediator;
+}
+
+/**
  * Middleware for framework integration
  * Attaches mediator instance to request context
  */
 export function mediatorMiddleware() {
   return async (ctx: any, next: () => Promise<void>): Promise<void> => {
     // Attach mediator to context for framework integration
-    ctx.mediator = getMediator();
+    attachMediator(ctx);
     await next();
   };
 }
@@ -77,4 +106,4 @@ export async function publishNotification<TNotification extends INotification>(
  */
 export function getMediatorStats(): RegistryStats {
   return getMediator().getStats();
-} 
+}

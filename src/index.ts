@@ -31,6 +31,9 @@ export {
 // High-level middleware API
 export {
   mediatorMiddleware,
+  attachMediator,
+  resolveMediator,
+  type WithMediator,
   sendRequest,
   sendCommand,
   sendQuery,
@@ -52,5 +55,8 @@ export {
 // Advanced: Mediator and Registry classes for direct instantiation
 export { Mediator, MediatorFactory } from './mediator.js';
 export { Registry } from './registry.js';
+
+// Utility exports
+export { isResult } from './result-utils.js';
 
 // Note: Less frequently used helpers (batch, createFromData, ...) are in './helpers.js' 
