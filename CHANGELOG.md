@@ -7,6 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2025-10-20
+
+### Added
+- **Tree Shaking Optimization**: Multiple entry points for optimal bundle sizes
+  - `ts-micro-mediator/lite` - Essential features only (3.5KB minified)
+  - `ts-micro-mediator/core` - Core classes only (2.9KB minified)
+  - `ts-micro-mediator/registry` - Registry management only (1.2KB minified)
+  - `ts-micro-mediator/middleware` - Framework integration only (3.5KB minified)
+  - `ts-micro-mediator/advanced` - Advanced features only (3.5KB minified)
+- **Bundle Analysis**: Rollup configuration with bundle size analysis
+- **Optimized TypeScript Config**: Enhanced for better tree shaking support
+
+### Changed
+- **Package Structure**: Reorganized exports for better tree shaking
+- **Bundle Sizes**: Significantly reduced bundle sizes through optimization
+  - Full library: 4.3KB minified (down from ~31KB unpacked)
+  - Registry only: 1.2KB minified
+- **Import Strategy**: Root imports now work with automatic tree shaking
+- **Build Process**: Added Rollup for optimized ESM bundles
+
+### Improved
+- **Tree Shaking**: Modern bundlers automatically remove unused code
+- **Bundle Analysis**: Visual bundle analysis for optimization insights
+- **Developer Experience**: Clear documentation for different import strategies
+- **Performance**: Smaller bundles = faster loading times
+
+### Technical Details
+- Updated `ts-micro-result` to v2.1.10 for better compatibility
+- Enhanced TypeScript configuration for bundler optimization
+- Added `"sideEffects": false` for optimal tree shaking
+- Multiple ESM bundles for different use cases
+
 ## [1.2.0] - 2025-10-15
 
 ### Added

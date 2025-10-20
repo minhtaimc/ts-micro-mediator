@@ -12,12 +12,59 @@ A lightweight, edge-optimized Mediator Pattern implementation for TypeScript. De
 - CQRS: Command, Query, Notification separation
 - TypeScript-first, fully type-safe
 - Framework-agnostic (Hono, Express, Fastify, Elysia, ...)
-- Only 31KB unpacked
+- **Optimized tree shaking** with subpath imports
+- **Multiple bundle sizes** for different use cases
+- Only 4.3KB minified (full), 1.2KB (registry only)
 
 ## Installation
 
 ```bash
 npm install ts-micro-mediator
+```
+
+## Tree Shaking & Bundle Optimization
+
+This library is optimized for tree shaking with multiple entry points:
+
+### Bundle Sizes (Minified)
+- **Full Library**: `ts-micro-mediator` - 4.3KB
+- **Lite Version**: `ts-micro-mediator/lite` - 3.5KB (essential features only)
+- **Core Only**: `ts-micro-mediator/core` - 2.9KB (Mediator + Registry classes)
+- **Registry Only**: `ts-micro-mediator/registry` - 1.2KB (handler management)
+- **Middleware Only**: `ts-micro-mediator/middleware` - 3.5KB (framework integration)
+- **Advanced Only**: `ts-micro-mediator/advanced` - 3.5KB (batch operations)
+
+### Import Strategies
+
+**Full Library (Convenience):**
+```typescript
+import { Mediator, sendCommand, registerCommandHandler } from 'ts-micro-mediator'
+```
+
+**Lite Version (Essential Features):**
+```typescript
+import { Mediator, sendCommand, registerCommandHandler } from 'ts-micro-mediator/lite'
+```
+
+**Specific Modules (Optimal Tree Shaking):**
+```typescript
+// Only core classes
+import { Mediator, Registry } from 'ts-micro-mediator/core'
+
+// Only registry management
+import { registerCommandHandler, registerQueryHandler } from 'ts-micro-mediator/registry'
+
+// Only middleware functions
+import { sendCommand, sendQuery, mediatorMiddleware } from 'ts-micro-mediator/middleware'
+
+// Only advanced features
+import { sendBatch, createRequestFromData } from 'ts-micro-mediator/advanced'
+```
+
+**Bundler Optimization:**
+Modern bundlers (Webpack, Rollup, Vite) automatically tree-shake unused code even with root imports:
+```typescript
+import { sendCommand } from 'ts-micro-mediator' // Only includes what you use
 ```
 
 ## Why CQRS Pattern?
@@ -473,6 +520,33 @@ class MediatorFactory {
   static getRegistry(): Registry | null;
 }
 ```
+
+---
+
+## Performance & Bundle Analysis
+
+### Bundle Size Comparison
+| Entry Point | Minified Size | Use Case |
+|-------------|---------------|----------|
+| `ts-micro-mediator` | 4.3KB | Full library with all features |
+| `ts-micro-mediator/lite` | 3.5KB | Essential features for most apps |
+| `ts-micro-mediator/core` | 2.9KB | Just Mediator and Registry classes |
+| `ts-micro-mediator/registry` | 1.2KB | Handler management only |
+| `ts-micro-mediator/middleware` | 3.5KB | Framework integration |
+| `ts-micro-mediator/advanced` | 3.5KB | Batch operations and utilities |
+
+### Tree Shaking Benefits
+- **Automatic Optimization**: Modern bundlers remove unused code
+- **Subpath Imports**: Import only what you need
+- **Zero Runtime Overhead**: No unused code in final bundle
+- **Faster Loading**: Smaller bundles = better performance
+
+### Bundle Analysis
+Run `npm run analyze` to generate a visual bundle analysis showing:
+- Bundle composition
+- Tree shaking effectiveness
+- Gzip/Brotli compression ratios
+- Dependency breakdown
 
 ---
 

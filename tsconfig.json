@@ -2,18 +2,19 @@
   "compilerOptions": {
     "target": "ES2022",
     "module": "ESNext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "lib": ["ES2022"],
     "outDir": "./dist",
     "rootDir": "./src",
     "strict": true,
     "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "declaration": true,
-    "declarationMap": false,
+    "declarationMap": true,
     "sourceMap": false,
-    "removeComments": false,
+    "removeComments": true,
     "noImplicitAny": true,
     "noImplicitReturns": true,
     "noImplicitThis": true,
@@ -26,7 +27,7 @@
   },
   "include": [
     "src/**/*"
-, "examples/generate-handlers.js"  ],
+  ],
   "exclude": [
     "node_modules",
     "dist",

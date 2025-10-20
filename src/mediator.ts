@@ -10,9 +10,8 @@ import {
   RegistryStats
 } from './types.js';
 import { Registry } from './registry.js';
-import { Result, err } from 'ts-micro-result';
+import { Result, err, isResult } from 'ts-micro-result';
 import { MEDIATOR_ERRORS } from './mediator-errors.js';
-import { isResult } from './result-utils.js';
 
 /**
  * Edge-optimized Mediator
@@ -54,7 +53,7 @@ export class Mediator implements IMediator {
     const handler = this._registry.getHandler(requestType);
 
     if (!handler) {
-      return err(MEDIATOR_ERRORS.HANDLER_NOT_FOUND(requestType));
+      return err(MEDIATOR_ERRORS.HANDLER_NOT_FOUND({ requestType }));
     }
 
     try {
@@ -62,9 +61,9 @@ export class Mediator implements IMediator {
       if (isResult(result)) {
         return result as Result<TResponse>;
       }
-      return err(MEDIATOR_ERRORS.INVALID_HANDLER_RESULT(requestType));
+      return err(MEDIATOR_ERRORS.INVALID_HANDLER_RESULT({ requestType }));
     } catch {
-      return err(MEDIATOR_ERRORS.HANDLER_ERROR(requestType));
+      return err(MEDIATOR_ERRORS.HANDLER_ERROR({ requestType }));
     }
   }
 

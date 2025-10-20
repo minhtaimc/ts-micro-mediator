@@ -1,62 +1,20 @@
 /**
  * ts-micro-mediator - Edge-optimized Mediator Pattern
  * 
- * High-level API for Cloudflare Workers and edge computing
- * Minimal memory footprint, fast execution
+ * Main entry point - re-exports everything for convenience
+ * For optimal tree shaking, use subpath imports:
+ * - ts-micro-mediator/core - Core mediator functionality
+ * - ts-micro-mediator/registry - Registry management
+ * - ts-micro-mediator/middleware - Framework integration
+ * - ts-micro-mediator/advanced - Advanced features
+ * - ts-micro-mediator/lite - Minimal bundle
  */
 
-// Public interfaces - what users should implement
-export {
-  IQuery, 
-  ICommand,
-  INotification,
-  IMediator,
-  IRequest,
-  RequestHandler,
-  CommandHandler,
-  QueryHandler,
-  NotificationHandler
-} from './types.js';
-
-// Public registry API (frequently used)
-export {
-  registerHandler,
-  registerCommandHandler,
-  registerQueryHandler,
-  registerNotificationHandler,
-  registerRequestClass,
-  registerNotificationClass
-} from './helpers.js';
-
-// High-level middleware API
-export {
-  mediatorMiddleware,
-  attachMediator,
-  resolveMediator,
-  type WithMediator,
-  sendRequest,
-  sendCommand,
-  sendQuery,
-  publishNotification,
-  getMediatorStats
-} from './middleware.js';
-
-// Advanced helper functions (less frequently used)
-export {
-  createRequestFromData,
-  createNotificationFromData,
-  registerBatch,
-  getRegistryStats,
-  resetRegistry,
-  sendBatch,
-  publishBatch
-} from './helpers.js';
-
-// Advanced: Mediator and Registry classes for direct instantiation
-export { Mediator, MediatorFactory } from './mediator.js';
-export { Registry } from './registry.js';
+// Re-export all submodules for convenience
+export * from './core.js';
+export * from './registry.js';
+export * from './middleware.js';
+export * from './advanced.js';
 
 // Utility exports
-export { isResult } from './result-utils.js';
-
-// Note: Less frequently used helpers (batch, createFromData, ...) are in './helpers.js' 
+export { isResult } from 'ts-micro-result';
