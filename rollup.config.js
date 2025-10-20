@@ -29,7 +29,7 @@ const createConfig = (input, outputName) => ({
       declarationDir: './dist'
     }),
     ...(outputName === 'index' ? [visualizer({
-      filename: `dist/bundle-analysis.html`,
+      filename: `bundle-analysis.html`,
       open: false,
       gzipSize: true,
       brotliSize: true

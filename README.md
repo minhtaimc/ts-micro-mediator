@@ -15,6 +15,7 @@ A lightweight, edge-optimized Mediator Pattern implementation for TypeScript. De
 - **Optimized tree shaking** with subpath imports
 - **Multiple bundle sizes** for different use cases
 - Only 4.3KB minified (full), 1.2KB (registry only)
+- 96.1KB unpacked (smaller than mediatr-ts)
 
 ## Installation
 
