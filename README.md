@@ -15,7 +15,7 @@ A lightweight, edge-optimized Mediator Pattern implementation for TypeScript. De
 - **Optimized tree shaking** with subpath imports
 - **Multiple bundle sizes** for different use cases
 - Only 4.3KB minified (full), 1.2KB (registry only)
-- 96.1KB unpacked (smaller than mediatr-ts)
+- 84.2KB unpacked (37% smaller than mediatr-ts, 45% smaller than @nestjs/cqrs)
 
 ## Installation
 
@@ -535,6 +535,13 @@ class MediatorFactory {
 | `ts-micro-mediator/registry` | 1.2KB | Handler management only |
 | `ts-micro-mediator/middleware` | 3.5KB | Framework integration |
 | `ts-micro-mediator/advanced` | 3.5KB | Batch operations and utilities |
+
+### Package Size Comparison
+| Package | Unpacked Size | Package Size |
+|---------|---------------|--------------|
+| **ts-micro-mediator** | **84.2KB** ✅ | **11.5KB** ✅ |
+| mediatr-ts | 133.9KB | - |
+| @nestjs/cqrs | 154.8KB | - |
 
 ### Tree Shaking Benefits
 - **Automatic Optimization**: Modern bundlers remove unused code

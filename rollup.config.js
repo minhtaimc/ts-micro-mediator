@@ -18,7 +18,13 @@ const createConfig = (input, outputName) => ({
       plugins: [terser()]
     }
   ],
-  external: ['ts-micro-result'],
+  external: (id) => {
+    // Keep ts-micro-result external for tree shaking
+    if (id === 'ts-micro-result' || id.startsWith('ts-micro-result/')) {
+      return true;
+    }
+    return false;
+  },
   plugins: [
     nodeResolve({
       preferBuiltins: false

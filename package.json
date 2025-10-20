@@ -34,7 +34,8 @@
   },
   "sideEffects": false,
   "files": [
-    "dist/*.js",
+    "dist/*.esm.js",
+    "dist/*.esm.min.js",
     "dist/*.d.ts",
     "README.md"
   ],
